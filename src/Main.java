@@ -1,78 +1,69 @@
-// Java Program to Create
-// HashMap in Java
-import java.util.HashMap;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 
-// Driver Class
 public class Main {
-    // main function
     public static void main(String[] args) {
 
-        // İzmir'in bilgilerini içeren bir obje oluşturalım
-        LandMarkInformations izmir = new LandMarkInformations("Hotel", 25.0 ,4);
-        LandMarkInformations sude = new LandMarkInformations("uzay", 24.0 ,4);
+        String[] filePaths = {"/Users/sudenurkomur/IdeaProjects/TravelAgency/src/landmark_map_data.txt",
+                //"/Users/sudenurkomur/IdeaProjects/TravelAgency/src/personal_interest.txt",
+                //"/Users/sudenurkomur/IdeaProjects/TravelAgency/src/visitor_load.txt"
+        };
 
-
-        // Tek bir anahtar altında iki değeri saklayacak bir HashMap oluşturalım
-        HashMap<String, LandMarkInformations> izmirBilgileri = new HashMap<>();
-        izmirBilgileri.put("Izmir", izmir);
-        izmirBilgileri.put("Sude", sude);
-
-        // Anahtarı kullanarak İzmir'in bilgilerine erişelim
-        LandMarkInformations izmirBilgi = izmirBilgileri.get("Izmir");
-        System.out.println("İzmir'in yüzölçümü: " + izmirBilgi.getName() );
-        System.out.println("İzmir'in sıcaklığı: " + izmirBilgi.getLoad() );
-
-        LandMarkInformations sudeBilgi = izmirBilgileri.get("Sude");
-        System.out.println("İzmir'in yüzölçümü: " + sudeBilgi.getName() );
-        System.out.println("İzmir'in sıcaklığı: " + sudeBilgi.getLoad() );
-        System.out.println("İzmir'in sıcaklığı: " + sudeBilgi.getInterest() );
-    }
-}
-
- class LandMarkInformations {
-    private String name;
-    private double load;
-    private double interest;
-
-    public LandMarkInformations(String name, double load ,double interest) {
-        this.name = name;
-        this.load = load;
-        this.interest=interest;
+        for (String filePath : filePaths) {
+            ProcessFile.process(filePath);
+        }
     }
 
-    public String getName() {
-        return name;
-    }
+    // Inner class for processing files
+    static class ProcessFile {
+        public static void process(String filePath) {
+            int lineCount;
+            BufferedReader objReader = null;
+            try {
+                String strCurrentLine;
 
-    public double getLoad() {
-        return load;
-    }
+                objReader = new BufferedReader(new FileReader(filePath));
+                // Finding the number of lines in the file
+                lineCount = 0;
+                while (objReader.readLine() != null) {
+                    lineCount++;
+                }
 
-     public double getInterest() {
-         return interest;
-     }
-}
+                // Array to store first spaces
+                Object[][] landmarkData = new Object[lineCount][7]; // Create an array of appropriate size
 
-class OtherLandMarkInformations {
-    private String name;
-    private double destination;
-    private double attractiveness;
+                // Reading the content of the file line by line and splitting by spaces
+                String line;
+                int lineIncrease = 0;
+                while ((line= objReader.readLine())!= null && lineIncrease != lineCount) {
+                    String[] words = line.split("\\s+"); // Split by spaces
+                    System.out.println(words[1]);
+                    if (words.length >= 2) {
+                        landmarkData[lineIncrease][0] = words[0];
+                        landmarkData[lineIncrease][1] = words[1];
+                    }
+                    lineIncrease++;
+                }
 
-    public OtherLandMarkInformations(String name, double destination,double attractiveness) {
-        this.name = name;
-        this.destination = destination;
-        this.attractiveness=attractiveness;
-    }
+                /*for (int i = 0; i < lineCount; i++) {
+                    for(int m=0;m< 7;m++)
+                    {
+                        System.out.print(landmarkData[i][m] + " ");
+                    }
+                    System.out.println();
+                }*/
 
-    public String getName() {
-        return name;
-    }
+                // Closing the used resources
+                objReader.close();
 
-    public double getDestination() {
-        return destination;
-    }
 
-    public double getAttractiveness() {
-        return attractiveness;
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
