@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Scanner;
 
 public class Structure {
     public static void main(String[] args) throws IOException {
@@ -20,7 +21,6 @@ public class Structure {
 
             ProcessFile file =new ProcessFile();
             Score score =new Score();
-            PrintArray print =new PrintArray();
 
             BufferedReader findLine = new BufferedReader(new FileReader(filePaths[0]));
             BufferedReader findLine_two = new BufferedReader(new FileReader(filePaths[1]));
@@ -41,18 +41,40 @@ public class Structure {
                 lineCount_three++;
             }
 
-            Object[][] rowData = new Object[lineCount-1][7];
+            Object[][] rowData = new Object[lineCount-1][8];
+
+
+            Scanner myObj = new Scanner(System.in);  // Create a Scanner object
+            System.out.print("Please enter the total number of landmarks (including Hotel): ");
+            int Size = myObj.nextInt();  // Read user input
+
+            Point[][] map = new Point[Size][Size];
+
+            for(int i=0;i<Size;i++){
+                map[i][i]= new Point(-1,  "not-exist");
+            }
 
             file.processLandmarks(filePaths[0], rowData ,lineCount);
             file.processPersonalInterest(filePaths[1], rowData,lineCount_two);
             file.processVisitorLoad(filePaths[2], rowData,lineCount_three);
             score.landmarkaAttractiveScore(rowData);
-            print.printScreen(rowData);
+            PrintArray.printScreen(rowData , map);
 
         }
 
     }
-    class ProcessFile {
+
+class Point {
+    float score;
+    String landmarkName;
+
+    public Point(float score, String landmarkName) {
+        this.score = score;
+        this.landmarkName = landmarkName;
+    }
+}
+
+class ProcessFile {
         public static void processLandmarks(String filePath , Object[][] rowData , int lineCount) throws FileNotFoundException {
         BufferedReader objReader ;
         try {
@@ -63,9 +85,7 @@ public class Structure {
 
             while ((strCurrentLine = objReader.readLine()) != null && lineIncrease != lineCount) {
                 // Satırı boşluklara göre böler ve elde edilen parçaları bir diziye atar
-
                 Object[] parts = strCurrentLine.split("\\s+");
-
                 //System.out.println(lineCount);
 
                 if(lineIncrease != 0){
@@ -121,8 +141,6 @@ public class Structure {
                 }
                 lineIncrease++;
             }
-
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -140,9 +158,7 @@ public class Structure {
                     // Satırı boşluklara göre böler ve elde edilen parçaları bir diziye atar
 
                     Object[] parts = strCurrentLine.split("\\s+");
-
                     //System.out.println(lineCount);
-
                     if(lineIncrease != 0){
                         //System.out.println(parts[0]);
                         // Elde edilen parçaları diziye atar
@@ -157,38 +173,63 @@ public class Structure {
                     }
                     lineIncrease++;
                 }
-
-
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
-
     }
 
 class Score{
-
     public static void landmarkaAttractiveScore(Object[][] rowData){
 
-        for(int i=0;i<rowData.length;i++){
-            float attractiveness = Float.parseFloat(Float.toString((Float) rowData[i][2])) *
-                    Float.parseFloat(Float.toString((Float) rowData[i][4])) *
-                    Float.parseFloat(Float.toString((Float) rowData[i][5]));
-            rowData[i][6] = attractiveness;
-        }
+        for (int i = 0; i < rowData.length; i++) {
+            // Öğelerin uygun türde olduğundan emin olmak için kontrol edin
+            if (rowData[i][2] instanceof Float && rowData[i][4] instanceof Float && rowData[i][5] instanceof Float) {
+                // Üç özelliğin çarpımıyla çekicilik hesaplanır
+                float attractiveness = (float)rowData[i][2] * (float)rowData[i][4] * (float)rowData[i][5];
 
+                // Hesaplanan çekicilik değeri rowData dizisinde ilgili öğenin altıncı sütununa atanır
+                rowData[i][6] = attractiveness;
+            }
+        }
     }
 }
 
-class PrintArray{
+class FillMap{
 
-    public static void printScreen(Object[][] rowData){
+    public static void fillMap(Point[][] map, Object[][] rowData, int Size){
+
+    }
+}
+class PrintArray{
+    public static void printScreen(Object[][] rowData , Point[][] map){
 
         for(int i=0;i< rowData.length;i++){
             for(int m=0;m<rowData[i].length;m++){
-                System.out.print(rowData[i][m] + " ");
+                System.out.print(rowData[i][m] + "  ");
             }
             System.out.println();
         }
+
+        System.out.println();
+
+        /*for(int i=0;i< map.length;i++){
+            for(int m=0;m<map[i].length;m++){
+                System.out.print(map[i][m] + " ");
+            }
+            System.out.println();
+        }*/
+
+        for (int i = 0; i < map.length; i++) {
+            for (int j = 0; j < map[i].length; j++) {
+                Point point = map[i][j];
+                if (point != null) {
+                    System.out.println(" Score: " + point.score + ", " + " Landmark Adı: " + point.landmarkName + " ");
+                } else {
+                    //System.out.println("Koordinatlar: (Boş), Landmark Adı: (Boş)");
+                }
+            }
+        }
     }
 }
+
