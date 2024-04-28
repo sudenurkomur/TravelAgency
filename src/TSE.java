@@ -69,7 +69,7 @@ class callFile{
         file.processVisitorLoad(filePaths[2], rowData,lineCount_three);
         score.landmarkaAttractiveScore(rowData);
         FillMap.fillMap(map ,rowData,Size);
-        System.out.println(TspMax.tspMax(Size,Size-1,map));
+        //System.out.println(TspMax.tspMax(Size,Size-1,map));
         System.out.println();
         PrintArray.printScreen(rowData , map);
 
@@ -257,7 +257,7 @@ class FillMap{
     }
 }
 
-class TspMax{
+/*class TspMax{
 
     public static float tspMax(int N, int start, Point[][] dist) {
         int VISITED_ALL = (1 << N) - 1;

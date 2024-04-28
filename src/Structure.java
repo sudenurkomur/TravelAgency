@@ -2,8 +2,12 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
+import java.util.*;
+
 
 public class Structure {
     public static void main(String[] args) throws IOException {
@@ -44,7 +48,6 @@ public class Structure {
 
             Object[][] rowData = new Object[lineCount-1][8];
 
-
             Scanner myObj = new Scanner(System.in);  // Create a Scanner object
             System.out.print("Please enter the total number of landmarks (including Hotel): ");
             int Size = myObj.nextInt();  // Read user input
@@ -63,15 +66,17 @@ public class Structure {
             }
 
 
-
             file.processLandmarks(filePaths[0], rowData ,lineCount);
             file.processPersonalInterest(filePaths[1], rowData,lineCount_two);
             file.processVisitorLoad(filePaths[2], rowData,lineCount_three);
             score.landmarkaAttractiveScore(rowData);
+
             FillMap.fillMap(map ,rowData,Size);
-            System.out.println(TspMax.tspMax(Size,Size-1,map));
+
+            float[] result = TSE.tspMax(Size, 0, map);
+            System.out.format("%.1f%n", result[0]);
             System.out.println();
-            PrintArray.printScreen(rowData , map);
+            PrintArray.printScreen(rowData,map);
 
         }
 
@@ -221,8 +226,8 @@ class FillMap{
                 String source = (String) rowData[i][0];
                 String destination = (String) rowData[i][1];
                 boolean flag= false;
-                for(int m=Size-1;m>=0;m--){
-                    for(int k=Size-1;k>=0;k--){
+                for(int m=0;m<=Size-1;m++){
+                    for(int k=0;k<=Size-1;k++){
                         if (map[m][k].score==(0)) {
                             map[m][k].score = (float) rowData[i][6];
                             map[m][k].time = (float) rowData[i][3];
@@ -257,53 +262,7 @@ class FillMap{
     }
 }
 
-class TspMax{
 
-    public static float tspMax(int N, int start, Point[][] dist) {
-        int VISITED_ALL = (1 << N) - 1;
-        int[][] parent = new int[1 << N][N];
-        float[][] dp = new float[1 << N][N];
-        for (float[] row : dp) {
-            Arrays.fill(row, 0.0f);
-        }
-        dp[1 << start][start] = 0.0f;
-
-        for (int mask = 1; mask < (1 << N); mask += 2) {
-            for (int last = 0; last < N; last++) {
-                if ((mask & (1 << last)) != 0) {
-                    for (int current = 0; current < N; current++) {
-                        if ((mask & (1 << current)) == 0) {
-                            float newScore = dp[mask][last] + dist[last][current].score;
-                            if (newScore > dp[mask | (1 << current)][current]) {
-                                dp[mask | (1 << current)][current] = newScore;
-                                parent[mask | (1 << current)][current] = last;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        float maxScore = Float.MIN_VALUE;
-        int last = -1;
-        for (int i = 0; i < N; i++) {
-            if (i != start && dp[VISITED_ALL][i] > maxScore) {
-                maxScore = dp[VISITED_ALL][i];
-                last = i;
-            }
-        }
-
-        if (maxScore == Float.MIN_VALUE) {
-            // No valid path exists
-            return Float.MIN_VALUE;
-        }
-
-        return maxScore;
-    }
-
-
-
-}
 class PrintArray{
     public static void printScreen(Object[][] rowData , Point[][] map){
 
@@ -331,9 +290,54 @@ class PrintArray{
                 if (point != null) {
                     System.out.println(" Score: " + point.score + ", " + " Landmark : " + point.landmarkNameStart + " to " + point.landmarkNameto + "  Time: " + point.time);
                 } else {
-                    //System.out.println("Koordinatlar: (Boş), Landmark Adı: (Boş)");
+                    System.out.println("Koordinatlar: (Boş), Landmark Adı: (Boş)");
                 }
             }
         }
     }
 }
+
+class TSE {
+    public static float[] tspMax(int Size, int start, Point[][] map) {
+        int VISITED_ALL = (1 << Size) - 1;
+        float[][] dp = new float[1 << Size][Size];
+        int[][] parent = new int[1 << Size][Size];
+        for (float[] row : dp) {
+            Arrays.fill(row, Float.MIN_VALUE);
+        }
+
+        dp[1 << start][start] = 0.0f;
+
+        for (int mask = 1; mask < (1 << Size); mask += 2) {
+            for (int last = 0; last < Size; last++) {
+                if ((mask & (1 << last)) != 0) {
+                    for (int current = 0; current < Size; current++) {
+                        if ((mask & (1 << current)) == 0) {
+                            float newDist = dp[mask][last] + map[last][current].score;
+                            if (newDist > dp[mask | (1 << current)][current]) {
+                                dp[mask | (1 << current)][current] = newDist;
+                                parent[mask | (1 << current)][current] = last;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        float maxCost = Float.MIN_VALUE;
+        int last = -1;
+        for (int i = 0; i < Size; i++) {
+            if (i != start && dp[VISITED_ALL][i] + map[i][start].score > maxCost) {
+                maxCost = dp[VISITED_ALL][i] + map[i][start].score;
+                last = i;
+            }
+        }
+
+        if (maxCost == Float.MIN_VALUE) {
+            return new float[]{Float.MIN_VALUE, Float.MIN_VALUE};
+        }
+
+        return new float[]{maxCost};
+    }
+}
+

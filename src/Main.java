@@ -1,4 +1,8 @@
 import java.io.*;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.*;
 
 class Record
@@ -28,8 +32,10 @@ class Record
         createTimeArray(graphtime_map, arrayList);
         int indexOfHotel = getIndexOfHotel(arrayList, Size);
         List<Integer> IndexOfPath = new ArrayList<>();
-        System.out.println(tspMax(Size, indexOfHotel, graphscore_map,IndexOfPath));
-        System.out.println();
+        double[] array = (tspMax(Size, indexOfHotel,graphscore_map, graphtime_map, IndexOfPath));
+        System.out.println(array[0]);
+        System.out.println(array[1]);
+
 
     }
     public static void readLandMark(ArrayList<Record> arrayList){
@@ -129,14 +135,16 @@ class Record
         }
         return -1;
     }
-    public static double tspMax(int N, int start, Double[][] dist, List<Integer> path) {
+    public static double[] tspMax(int N, int start, Double[][] dist, Double[][] time, List<Integer> path) {
         int VISITED_ALL = (1 << N) - 1;
         double[][] dp = new double[1 << N][N];
+        double[][] dpTime = new double[1 << N][N];
         int[][] parent = new int[1 << N][N];
         for (double[] row : dp) {
             Arrays.fill(row, Double.MIN_VALUE);
         }
         dp[1 << start][start] = 0.0;
+        dpTime[1 << start][start] = 0.0;
 
         for (int mask = 1; mask < (1 << N); mask += 2) {
             for (int last = 0; last < N; last++) {
@@ -144,8 +152,13 @@ class Record
                     for (int current = 0; current < N; current++) {
                         if ((mask & (1 << current)) == 0) {
                             double newDist = dp[mask][last] + dist[last][current];
+                            double newTime = dpTime[mask][last] + time[last][current];
                             if (newDist > dp[mask | (1 << current)][current]) {
                                 dp[mask | (1 << current)][current] = newDist;
+                                dpTime[mask | (1 << current)][current] = newTime;
+                                parent[mask | (1 << current)][current] = last;
+                            } else if (newDist == dp[mask | (1 << current)][current] && newTime < dpTime[mask | (1 << current)][current]) {
+                                dpTime[mask | (1 << current)][current] = newTime;
                                 parent[mask | (1 << current)][current] = last;
                             }
                         }
@@ -164,7 +177,7 @@ class Record
         }
 
         if (maxCost == Double.MIN_VALUE) {
-            return Double.MIN_VALUE;
+            return new double[]{Double.MIN_VALUE, Double.MIN_VALUE};
         }
 
         int mask = VISITED_ALL;
@@ -178,8 +191,9 @@ class Record
         path.add(start);
         Collections.reverse(path);
 
-        return maxCost;
-    }
+        double totalTime = dpTime[VISITED_ALL][last] + time[last][start];
 
+        return new double[]{maxCost, totalTime};
+    }
 
 }
