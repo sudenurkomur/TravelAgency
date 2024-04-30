@@ -340,4 +340,3 @@ class TSE {
         return new float[]{maxCost};
     }
 }
-
