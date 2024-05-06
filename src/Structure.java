@@ -16,7 +16,7 @@ public class Structure {
     }
 }
 
-    class callFile{
+class callFile{
         public static void call() throws IOException {
 
             String[] filePaths = {"/Users/sudenurkomur/IdeaProjects/TravelAgency/src/landmark_map_data.txt",
@@ -73,8 +73,8 @@ public class Structure {
 
             FillMap.fillMap(map ,rowData,Size);
 
-            float[] result = TSE.tspMax(Size, 0, map);
-            System.out.format("%.1f%n", result[0]);
+            //float[] result = TSE.tspMax(Size, 0, map);
+            //System.out.format("%.1f%n", result[0]);
             System.out.println();
             PrintArray.printScreen(rowData,map);
 
@@ -325,13 +325,18 @@ class TSE {
         }
 
         float maxCost = Float.MIN_VALUE;
-        int last = -1;
+        int last;
         for (int i = 0; i < Size; i++) {
             if (i != start && dp[VISITED_ALL][i] + map[i][start].score > maxCost) {
+                System.out.println(map[i][start].score);
                 maxCost = dp[VISITED_ALL][i] + map[i][start].score;
                 last = i;
             }
         }
+
+        /*for (int i = 0; i < dp[VISITED_ALL].length; i++) {
+            System.out.println(dp[VISITED_ALL][i]);
+        }*/
 
         if (maxCost == Float.MIN_VALUE) {
             return new float[]{Float.MIN_VALUE, Float.MIN_VALUE};
